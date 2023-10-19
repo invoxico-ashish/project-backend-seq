@@ -4,33 +4,36 @@ const ProdCate = db.prodCate;
 // api for both insert and update 
 const add_Update_Prodcate = async (req, res) => {
     const { prodCatName, prodCatParent, prodCatIsFeatured, prodCatStatus, prodcatId } = req.body;
+    console.log(req.body)
     if (!prodCatName || !prodCatParent || !prodCatIsFeatured || !prodCatStatus) {
-        return res.status(204).json({ success: false, message: "Content is Required" });
-    };
-    try {
-        if (prodcatId) {
-            const dataToUpdate = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus, prodcat_id: prodcatId };
-            console.log(dataToUpdate, "dataToUpdate")
-            // return
-            const updateProdCate = await ProdCate.update(dataToUpdate, {
-                where: { prodcat_id: prodcatId }
-            });
-            if (updateProdCate[0] === 1) {
-                return res.status(200).json({ success: true, message: "Updated successfully" });
-            } else {
-                return res.status(404).json({ success: false, message: "Record not found for the given ID" });
+        return res.status(400).json({ success: false, message: "Content is Required" });
+    } else {
+        try {
+            if (prodcatId) {
+                const dataToUpdate = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus, prodcat_id: prodcatId };
+                console.log(dataToUpdate, "dataToUpdate")
+                // return
+                const updateProdCate = await ProdCate.update(dataToUpdate, {
+                    where: { prodcat_id: prodcatId }
+                });
+                if (updateProdCate[0] === 1) {
+                    return res.status(200).json({ success: true, message: "Updated successfully" });
+                } else {
+                    return res.status(404).json({ success: false, message: "Record not found for the given ID" });
+                };
+            }
+            else {
+                const dataToInsert = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus };
+                console.log(dataToInsert, "dataToInsert")
+                // return
+                const addProdCate = await ProdCate.create(dataToInsert);
+                return res.status(200).json({ success: true, message: "Successfully inserted", addProdCate });
             };
-        }
-        else {
-            const dataToInsert = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus };
-            console.log(dataToInsert, "dataToInsert")
-            // return
-            const addProdCate = await ProdCate.create(dataToInsert);
-            return res.status(200).json({ success: true, message: "Successfully inserted", addProdCate });
+        } catch (error) {
+            return res.status(500).json({ success: false, message: "Something went wrong", error });
         };
-    } catch (error) {
-        return res.status(500).json({ success: false, message: "Something went wrong", error });
-    };
+    }
+
 };
 const deleteProdCateById = async (req, res) => {
     const id = req.params.id;
@@ -114,6 +117,7 @@ const updateStatusSingleById = async (req, res) => {
 }
 const deleteMultipleCateById = async (req, res) => {
     const ids = req.body.prodcatId;
+    console.log(ids)
     // return
     if (!Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ success: false, message: "Invalid or empty list of IDs" });
@@ -138,8 +142,10 @@ const deleteMultipleCateById = async (req, res) => {
 const updateMultipleActiveById = async (req, res) => {
     const ids = req.body.prodcatId;
     const prodCatStatus = req.body.prodCatStatus;
-    console.log(ids)
-    if (!ids) {
+    console.log(ids,prodCatStatus)
+
+    // return
+    if (!ids && !prodCatStatus) {
         return res.status(404).json({ success: false, message: "No result found / id required" })
     };
     try {
