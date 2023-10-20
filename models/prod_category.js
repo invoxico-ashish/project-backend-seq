@@ -28,10 +28,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER(1),
             defaultValue: 0,
         },
-        prodcat_test: {
-            type: DataTypes.INTEGER(1),
-            defaultValue: 0,
-        },
     }, {
         createdAt: "prodcat_added_at",
         updatedAt: "prodcat_updated_at"

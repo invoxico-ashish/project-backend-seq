@@ -27,9 +27,11 @@ db.sequelize = sequelize;
 
 db.admin = require("../models/admin")(sequelize, DataTypes);
 db.prodCate = require("../models/prod_category")(sequelize, DataTypes);
+db.Test = require("../models/test")(sequelize, DataTypes)
+db.img = require("../models/testImg")(sequelize, DataTypes);
 db.sequelize.sync({ force: false }).then(() => {
     console.log('yes re-sync done!')
- 
+
 });
 
 

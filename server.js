@@ -3,12 +3,14 @@ const cors = require("cors");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const path = require('path');
 require('dotenv').config();
 
 const secrteKey = process.env.SECRTE_KEY;
 const port = process.env.PORT
 const app = express();
 app.use(express.json())
+
 // app.use(express.static("src"));
 // let corOptions = {oirign: `http://localhost:8081`}
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -25,7 +27,9 @@ app.use(
             maxAge: 24 * 60 * 60 * 1000,
         }, // set the session cookie properties
     })
-);
+    );
+    
+app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use("/api", require("./routes/postRoutes"))
 app.use("/get", require("./routes/getRoutes"));
 app.use("/put",require("./routes/updateRoutes"))
