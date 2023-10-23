@@ -32,5 +32,5 @@ module.exports = (sequelize, DataTypes) => {
         createdAt: "prodcat_added_at",
         updatedAt: "prodcat_updated_at"
     });
-    return ProdCate;
+    return ProdCate;    
 }

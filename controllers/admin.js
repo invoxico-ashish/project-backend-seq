@@ -11,7 +11,7 @@ const loginAdmin = async (req, res) => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     const secrteKey = process.env.JWT_SECRTE_KEY;
     if (userName && password) {
-        console.log(userName, password);
+        // console.log(userName, password);
         if (usernameRegex.test(userName) && passwordRegex.test(password)) {
             try {
                 const admin = await Admin.findOne({

@@ -1,11 +1,9 @@
 const db = require("../models");
 const ProdCate = db.prodCate;
-// const Test = db.img;
 
 // api for both insert and update 
 const add_Update_Prodcate = async (req, res) => {
     const { prodCatName, prodCatParent, prodCatIsFeatured, prodCatStatus, prodcatId } = req.body;
-    console.log(req.body)
     if (!prodCatName || !prodCatParent || !prodCatIsFeatured || !prodCatStatus) {
         return res.status(400).json({ success: false, message: "Content is Required" });
     } else {
@@ -25,9 +23,7 @@ const add_Update_Prodcate = async (req, res) => {
             }
             else {
                 const dataToInsert = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus };
-                console.log("dataToInsert")
                 const addProdCate = await ProdCate.create(dataToInsert);
-                console.log("insertd")
                 return res.status(200).json({ success: true, message: "Successfully inserted", addProdCate });
             };
         } catch (error) {
@@ -68,9 +64,9 @@ const getallProdCate = async (req, res) => {
             where: {
                 prodcat_deleted: 0
             },
-            // order: [
-            //     ['prodcat_id', 'DESC'] // Order by 'RegDate' in descending order
-            // ]
+            order: [
+                ['prodcat_id', 'DESC'] // Order by 'RegDate' in descending order
+            ]
         });
         return res.status(200).json({ success: true, message: "ok", "response": categories })
     } catch (error) {
@@ -98,7 +94,6 @@ const getSingleProdCateById = async (req, res) => {
 const updateStatusSingleById = async (req, res) => {
     const id = req.params.id;
     const prodCatStatus = req.body.prodCatStatus;
-    console.log(id, prodCatStatus)
     if (!id && !prodCatStatus)
         return res.status(404).json({ success: false, message: "No record found , id is required" });
     try {
@@ -160,28 +155,6 @@ const updateMultipleActiveById = async (req, res) => {
         };
     };
 };
-// const test = async (req, res) => {
-//     try {
-//         const uploaded_file = req.file.filename;
-//         console.log(uploaded_file)
-//         const addfile = await Test.create({ imgname: uploaded_file })
-//         console.log(addfile)
-//     } catch (error) {
-//         console.log(error)
-//     }
-//     // try {
-//     //     const paranoid = await Test.findAll({
-//     //         paranoid: false
-//     //     })
-//     //     console.log(paranoid)
-//     // } catch (error) {
-//     //     console.log(error)
-//     // }
-// }
-module.exports = {
-    add_Update_Prodcate, deleteProdCateById,
-    getallProdCate, getSingleProdCateById, updateStatusSingleById,
-    deleteMultipleCateById, updateMultipleActiveById, 
-};
+module.exports = { add_Update_Prodcate, deleteProdCateById, getallProdCate, getSingleProdCateById, updateStatusSingleById, deleteMultipleCateById, updateMultipleActiveById };
 
 

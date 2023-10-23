@@ -13,7 +13,7 @@ app.use(express.json())
 
 // app.use(express.static("src"));
 // let corOptions = {oirign: `http://localhost:8081`}
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors())
@@ -35,7 +35,4 @@ app.use("/get", require("./routes/getRoutes"));
 app.use("/put",require("./routes/updateRoutes"))
 app.use("/del", require("./routes/deleteRoutes"));
 
-
-app.listen(port, () => {
-    console.log(`Server in running on port ${port}`)
-})
+app.listen(port, () => {console.log(`Server in running on port ${port}`)});
