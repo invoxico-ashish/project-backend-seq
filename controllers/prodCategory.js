@@ -136,10 +136,7 @@ const deleteMultipleCateById = async (req, res) => {
 const updateMultipleActiveById = async (req, res) => {
     const ids = req.body.prodcatId;
     const prodCatStatus = req.body.prodCatStatus;
-    if (ids.length === 0 && !prodCatStatus) {
-        return res.status(400).json({ success: false, message: "No result found / id required" });
-    }
-    if (ids.length !== 0 && (prodCatStatus == 1 || prodCatStatus == 0)) {
+    if (ids.length > 0 && (prodCatStatus === 1 || prodCatStatus === 0)) {
         try {
             const response = await ProdCate.update(
                 { prodcat_active: prodCatStatus },
@@ -153,7 +150,10 @@ const updateMultipleActiveById = async (req, res) => {
         } catch (error) {
             return res.status(400).json({ success: false, message: "Something Went Wrong", error });
         };
-    };
+    }
+    else {
+        return res.status(400).json({ success: false, message: "No result found / id required" });
+    }
 };
 module.exports = { add_Update_Prodcate, deleteProdCateById, getallProdCate, getSingleProdCateById, updateStatusSingleById, deleteMultipleCateById, updateMultipleActiveById };
 
