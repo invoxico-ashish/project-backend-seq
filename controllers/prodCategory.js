@@ -1,4 +1,5 @@
 const db = require("../models");
+const { Op } = require("sequelize");
 const ProdCate = db.prodCate;
 
 // api for both insert and update 
@@ -10,12 +11,10 @@ const add_Update_Prodcate = async (req, res) => {
         try {
             if (prodcatId) {
                 const dataToUpdate = { prodcat_name: prodCatName, prodcat_parent: prodCatParent, prodcat_is_featured: prodCatIsFeatured, prodcat_active: prodCatStatus, prodcat_id: prodcatId };
-                console.log("dataToUpdate")
                 const updateProdCate = await ProdCate.update(dataToUpdate, {
                     where: { prodcat_id: prodcatId }
                 });
                 if (updateProdCate[0] === 1) {
-                    console.log("Updated")
                     return res.status(200).json({ success: true, message: "Updated successfully" });
                 } else {
                     return res.status(404).json({ success: false, message: "Record not found for the given ID" });
@@ -100,12 +99,11 @@ const updateStatusSingleById = async (req, res) => {
         const resposne = await ProdCate.update(
             {
                 prodcat_active: prodCatStatus
-            },
-            {
-                where: {
-                    prodcat_id: id
-                }
-            });
+            }, {
+            where: {
+                prodcat_id: id
+            }
+        });
         return res.status(200).json({ success: true, message: "Updated SuccessFully", resposne });
     } catch (error) {
         res.status(400).json({ success: false, message: "Something Went Wrong" });
@@ -155,6 +153,71 @@ const updateMultipleActiveById = async (req, res) => {
         return res.status(400).json({ success: false, message: "No result found / id required" });
     }
 };
-module.exports = { add_Update_Prodcate, deleteProdCateById, getallProdCate, getSingleProdCateById, updateStatusSingleById, deleteMultipleCateById, updateMultipleActiveById };
+const filterCategoryByName = async (req, res) => {
+    const inputName = req.query.prodCatName;
+    console.log(inputName);
+    if (inputName) {
+        try {
+            const findName = inputName.split(' ');
+            console.log(findName);
+            const matchingNames = await ProdCate.findAll({
+                attributes: [
+                    ["prodcat_id", "prodcatId"],
+                    ["prodcat_name", "prodCatName"],
+                    ["prodcat_active", "prodCatStatus"],
+                    ["prodcat_added_at", "RegDate"]
+                ],
+                where: {
+                    prodcat_name: {
+                        [Op.or]: findName.map((name) => (
+                            {
+                                [Op.like]: `%${name}%`,
+                            }
+                        ))
+                    },
+                    prodcat_deleted: 0
+                }
+            });
+            return res.status(200).json({ success: true, message: "SuccessFull", matchingNames })
+        } catch (error) {
+            return res.status(400).json({ success: false, message: "Something Went wrong", error })
+        }
+    }
+    else {
+        return res.status(400).json({ success: false, message: "name is required" })
+    }
+
+}
+const filterCategoryByStatus = async (req, res) => {
+    const prodCatStatus = req.body.prodCatStatus;
+    if (prodCatStatus || prodCatStatus === 0) {
+        try {
+            const findCate = await ProdCate.findAll({
+                attributes: [
+                    ["prodcat_id", "prodcatId"],
+                    ["prodcat_name", "prodCatName"],
+                    ["prodcat_active", "prodCatStatus"],
+                    ["prodcat_added_at", "RegDate"]
+                ],
+                where: {
+                    [Op.and]: [
+                        {
+                            prodcat_active: prodCatStatus
+                        },
+                        {
+                            prodcat_deleted: 0
+                        }
+                    ]
+                }
+            });
+            return res.status(200).json({ success: true, message: "successfull", findCate })
+        } catch (error) {
+            return res.status(400).json({ success: false, message: "Something went wrong", error })
+        }
+    } else {
+        return res.status(400).json({ success: false, message: "No record found" })
+    }
+};
+module.exports = { filterCategoryByStatus, filterCategoryByName, add_Update_Prodcate, deleteProdCateById, getallProdCate, getSingleProdCateById, updateStatusSingleById, deleteMultipleCateById, updateMultipleActiveById };
 
 

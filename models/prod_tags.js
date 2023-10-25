@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Tags = sequelize.define("tbl_products_tags", {
+    const Tags = sequelize.define("tbl_products_tag", {
         prodtag_id: {
             type: DataTypes.INTEGER(11),
             primaryKey: true,
@@ -20,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue:0
         },
-
     }, {
         createdAt: "prodctag_added_at",
         updatedAt: "prodtag_updated_at"

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require("sequelize");
+const { Sequelize,Op,DataTypes } = require("sequelize");
 
 let database = process.env.DB_DATABASE;
 let user = process.env.DB_USER;
@@ -29,8 +29,7 @@ db.admin = require("../models/admin")(sequelize, DataTypes);
 db.prodCate = require("../models/prod_category")(sequelize, DataTypes);
 db.Tags = require("../models/prod_tags")(sequelize, DataTypes)
 db.sequelize.sync({ force: false }).then(() => {
-    console.log('yes re-sync done!')
-
+    console.log('yes re-sync done!');
 });
 
 

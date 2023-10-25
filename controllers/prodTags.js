@@ -1,23 +1,27 @@
 const db = require("../models");
+const { sequelize, DataTypes } = require("sequelize");
+const { Op } = require("sequelize");
 const Tag = db.Tags;
 
 const addTag = async (req, res) => {
-    const { tagName, tagStatus, tagId } = req.body;
-    if (!tagName || !tagStatus) {
+    const { prodtag_name, prodtag_status, prodtag_id } = req.body;
+    if (!prodtag_name || !prodtag_status) {
         return res.status(400).json({ success: false, message: "name & status is required" });
-    } else {
+    }
+    else {
+
         try {
             // insert tag
-            if (!tagId) {
-                let dataToInsert = { prodtag_name: tagName, prodtag_active: tagStatus };
+            if (!prodtag_id) {
+                let dataToInsert = { prodtag_name: prodtag_name, prodtag_active: prodtag_status };
                 const addTag = await Tag.create(dataToInsert);
                 return res.status(201).json({ success: true, message: "tag add successfully", addTag })
             }
-            if (tagId) {
-                let dataToUpdate = { prodtag_name: tagName, prodtag_active: tagStatus, prodtag_id: tagId };
+            if (prodtag_id) {
+                let dataToUpdate = { prodtag_name: prodtag_name, prodtag_active: prodtag_status, prodtag_id: prodtag_id };
                 const updateTag = await Tag.update(dataToUpdate, {
                     where: {
-                        prodtag_id: tagId
+                        prodtag_id: prodtag_id
                     },
                 });
                 if (updateTag[0] === 1) {
@@ -35,16 +39,38 @@ const addTag = async (req, res) => {
 };
 const getAllTags = async (req, res) => {
     try {
-        const allTags = await Tag.findAll({});
+        const allTags = await Tag.findAll({
+            attributes: [
+                ["prodtag_id", "prodtag_id"],
+                ["prodtag_name", "prodtag_name"],
+                ["prodtag_active", "prodtag_status"],
+                ["prodctag_added_at", "RegDate"],
+            ], where: {
+                prodtag_delete: 0
+            },
+            order: [
+                ['prodtag_id', 'DESC'] // Order by 'RegDate' in descending order
+            ]
+        });
         return res.status(200).json({ success: true, message: "successfull", allTags });
     } catch (error) {
+        console.log(error)
         return res.status(400).json({ success: false, message: "something went wrong", error });
     };
 };
 const getSingleTag = async (req, res) => {
     const id = req.params.id;
     try {
-        const singleTag = await Tag.findByPk(id);
+        const singleTag = await Tag.findAll({
+            attributes: [
+                ["prodtag_id", "prodtag_id"],
+                ["prodtag_name", "prodtag_name"],
+                ["prodtag_active", "prodtag_status"],
+            ],
+            where: {
+                prodtag_id: id,
+            },
+        }, id);
         return res.status(200).json({ success: true, message: "successfull", singleTag });
     } catch (error) {
         console.log(error);
@@ -53,7 +79,9 @@ const getSingleTag = async (req, res) => {
 };
 const changeStatus = async (req, res) => {
     const id = req.params.id;
-    const prodtag_status = req.body.prodtag_active;
+    const prodtag_status = req.body.prodtag_status;
+    // console.log(prodtag_status)
+    // return
     if (prodtag_status || prodtag_status === 0) {
         try {
             const updateStatus = await Tag.update(
@@ -94,29 +122,38 @@ const deleteSingleTag = async (req, res) => {
 };
 const changeStatusMultiple = async (req, res) => {
     const prodtag_id = req.body.prodtag_id;
-    const prodtag_status = req.body.prodtag_active;
-    if (prodtag_id.length > 0 || prodtag_status || prodtag_status === 0) {
-        try {
-            const updateTag = await Tag.update({
-                prodtag_active: prodtag_status
-            },
-                {
-                    where: {
-                        prodtag_id: prodtag_id
-                    },
+    const prodtag_status = req.body.prodtag_status;
+    // console.log(prodtag_status, prodtag_id)
+    // return
+    if (prodtag_id.length > 0) {
+        if (prodtag_status === 1 || prodtag_status === 0) {
+            try {
+                const updateTag = await Tag.update({
+                    prodtag_active: prodtag_status
                 },
-            );
-            return res.status(200).json({ success: true, message: "update successfully", updateTag });
-        } catch (error) {
-            return res.status(400).json({ success: false, message: "something went wrong", error });
-        }
+                    {
+                        where: {
+                            prodtag_id: prodtag_id
+                        },
+                    },
+                );
+                return res.status(200).json({ success: true, message: "update successfully", updateTag });
+            } catch (error) {
+                return res.status(400).json({ success: false, message: "something went wrong", error });
+            }
+        } else {
+            return res.status(404).json({ success: false, message: "id or status is required " });
+        };
     } else {
-        return res.status(404).json({ success: false, message: "id or status is required ", error });
-    };
+        return res.status(400).json({ success: false, message: "id or status is required " });
+    }
+
 };
 const deleteMultipleTags = async (req, res) => {
     const id = req.body.prodtag_id;
-    if (id.length > 0) {
+    console.log(id)
+    // return
+    if (id.length > 0 && id) {
         try {
             const deleteMultiple = await Tag.update({
                 prodtag_delete: 1
@@ -134,4 +171,71 @@ const deleteMultipleTags = async (req, res) => {
         return res.status(404).json({ success: false, message: "no record found or id is required" })
     };
 };
-module.exports = { addTag, getAllTags, getSingleTag, changeStatus, deleteSingleTag, changeStatusMultiple, deleteMultipleTags };
+const filterTagByName = async (req, res) => {
+    const inputname = req.query.prodtag_name;
+    console.log(inputname);
+    // return
+    if (inputname) {
+        const findName = inputname.split(' ');
+        console.log(findName);
+        try {
+            const matchingNames = await Tag.findAll({
+                attributes: [
+                    ["prodtag_id", "prodtag_id"],
+                    ["prodtag_name", "prodtag_name"],
+                    ["prodtag_active", "prodtag_status"],
+                    ["prodctag_added_at", "RegDate"],
+                ],
+                where: {
+                    prodtag_name: {
+                        [Op.or]: findName.map((name) => (
+                            {
+
+                                [Op.like]: `%${name}%`,
+                            }
+                        ))
+                    },
+
+                    prodtag_delete: 0
+                }
+            });
+            return res.status(200).json({ success: true, message: "SuccessFull", matchingNames });
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({ success: false, message: "something went wrong", error })
+        };
+    }
+    else {
+        return res.status(400).json({ success: false, message: "name is required" })
+    }
+    // Split the input name into words
+
+
+};
+const filterTagByStatus = async (req, res) => {
+    const prodtag_status = req.body.prodtag_status;
+    if (prodtag_status || prodtag_status === 0) {
+        const findTag = await Tag.findAll({
+            attributes: [
+                ["prodtag_id", "prodtag_id"],
+                ["prodtag_name", "prodtag_name"],
+                ["prodtag_active", "prodtag_status"],
+                ["prodctag_added_at", "RegDate"],
+            ],
+            where: {
+                [Op.and]: [
+                    {
+                        prodtag_active: prodtag_status
+                    },
+                    {
+                        prodtag_delete: 0
+                    }]
+            }
+        });
+        res.send(findTag);
+    }
+    else {
+        console.log("err")
+    }
+}
+module.exports = { addTag, getAllTags, getSingleTag, changeStatus, deleteSingleTag, changeStatusMultiple, deleteMultipleTags, filterTagByName, filterTagByStatus };
